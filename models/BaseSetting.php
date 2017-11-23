@@ -119,14 +119,16 @@ class BaseSetting extends ActiveRecord implements SettingInterface
         } else {
             $t = gettype($value);
             if ($t == 'string') {
-                $error = false;
-                try {
-                    Json::decode($value);
-                } catch (InvalidParamException $e) {
-                    $error = true;
-                }
-                if (!$error) {
-                    $t = 'object';
+                if (preg_match('/[{\[]/ui', $value)) {
+                    $isObject = true;
+                    try {
+                        Json::decode($value);
+                    } catch (InvalidParamException $e) {
+                        $isObject = false;
+                    }
+                    if ($isObject) {
+                        $t = 'object';
+                    }
                 }
             }
             $model->type = $t;
